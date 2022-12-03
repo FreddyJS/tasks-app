@@ -1,7 +1,18 @@
 var OAuthLogin = (props) => {
     if(location.hash) {
         const hash = window.location.hash.substring(1);
-        const params = {};
+        let params = hash.split('&');
+        const handleParams = () => {
+            let result = {};
+            params.forEach((param) => {
+                const [key, value] = param.split('=');
+                result[key] = value;
+            });
+            return result;
+        }
+        params = handleParams();
+        console.log(params);
+
         if(params.access_token) {
             var jwtToken = jwt.parseJwtToken(params.access_token);
             jwt.storeJwtToken(params.access_token);
