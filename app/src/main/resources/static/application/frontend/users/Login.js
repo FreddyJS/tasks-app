@@ -26,7 +26,9 @@ var Login = (props) => {
         }, onSuccess);
     };
     const handleSSO = () => {
+        userService.oauthLogin();
     };
+
     return (
         <div className="row w-100">
            <div className="col">
