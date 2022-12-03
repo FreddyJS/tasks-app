@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sat Dec 03 15:33:35 CET 2022:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.1.0 - (1808820): instance a816c00e-0184-d868-27f2-000027cec7f0 
+on database directory C:\Users\sebas\Documents\Projects\tasks-app\oauth\work\database with class loader org.springframework.boot.loader.LaunchedURLClassLoader@6276ae34 
+Loaded from jar:file:/C:/Users/sebas/Documents/Projects/tasks-app/oauth/oauth2-server.jar!/BOOT-INF/lib/derby-10.14.1.0.jar!/
+java.vendor=Eclipse Adoptium
+java.runtime.version=11.0.17+8
+user.dir=C:\Users\sebas\Documents\Projects\tasks-app\oauth
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
