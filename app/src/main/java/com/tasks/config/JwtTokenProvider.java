@@ -50,6 +50,10 @@ public class JwtTokenProvider {
 
     public UsernamePasswordAuthenticationToken getUser(String token) {
         try {
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
             Claims claims = Jwts.parser()
                     .setSigningKey(Base64.getEncoder().encodeToString(jwtSecret.getBytes()))
                     .parseClaimsJws(token)

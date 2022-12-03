@@ -84,5 +84,15 @@ public class ProjectService {
     public Iterable<Project> findAll() {
         return projectsRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public boolean isOwner(Long projectId, String admin) throws InstanceNotFoundException {
+        Optional<Project> project = projectsRepository.findById(projectId);
+        if(!project.isPresent()) {
+            throw new InstanceNotFoundException(projectId, "Project" , MessageFormat.format("Project {0} does not exist", projectId));
+        }
+
+        return project.get().getAdmin().getUsername().equals(admin);
+    }
     
 }

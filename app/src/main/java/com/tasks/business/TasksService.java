@@ -233,4 +233,15 @@ public class TasksService {
         }
         return optComment.get();
     }    
+
+    @Transactional(readOnly = true)
+    public boolean isOwner(Long taskId, String username) throws InstanceNotFoundException {
+        Optional<Task> optTask = tasksRepository.findById(taskId);
+        if(!optTask.isPresent()) {
+            throw new InstanceNotFoundException(taskId, "Task", MessageFormat.format("Task {0} does not exist", taskId));
+        }
+        
+        Task task = optTask.get();
+        return task.getOwner().getUsername().equals(username);
+    }
 }

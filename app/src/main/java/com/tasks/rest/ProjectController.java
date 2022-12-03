@@ -6,6 +6,7 @@ import com.tasks.business.entities.Project;
 import com.tasks.business.entities.Task;
 import com.tasks.business.exceptions.DuplicatedResourceException;
 import com.tasks.business.exceptions.InstanceNotFoundException;
+import com.tasks.config.JwtTokenProvider;
 import com.tasks.rest.dto.ProjectDto;
 import com.tasks.rest.json.ErrorDetailsResponse;
 import io.swagger.annotations.Api;
@@ -20,9 +21,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
@@ -30,6 +33,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @Api(value = "Projects Management", tags = { "Projects Management" })
 public class ProjectController {
     
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     @Autowired
     private ProjectService projectService;
     
@@ -62,6 +68,7 @@ public class ProjectController {
         @ApiResponse(code = 409, message = "The task already exists", response = ErrorDetailsResponse.class)
     })
     @RequestMapping(value = "/projects", method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> doCreateProject(Principal principal, @RequestBody ProjectDto project) 
             throws DuplicatedResourceException, InstanceNotFoundException {
         Project newProject = projectService.create(project.getName(), project.getDescription(),
@@ -74,12 +81,19 @@ public class ProjectController {
     @ApiOperation(value = "Update project by id", authorizations = {@Authorization(value = "Bearer")})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully updated the project", response = Project.class),
+        @ApiResponse(code = 403, message = "You are not authorized to update this project", response = ErrorDetailsResponse.class),
         @ApiResponse(code = 404, message = "The project does not exist", response = ErrorDetailsResponse.class),
         @ApiResponse(code = 409, message = "The project already exists", response = ErrorDetailsResponse.class)
     })
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<?> doUpdateProject(@PathVariable("id") Long id, @RequestBody ProjectDto project) 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> doUpdateProject(@PathVariable("id") Long id, @RequestHeader (name="Authorization") String token, @RequestBody ProjectDto project) 
         throws InstanceNotFoundException, DuplicatedResourceException {        
+        boolean isOwner = projectService.isOwner(id, jwtTokenProvider.getUser(token).getName());
+        if (!isOwner) {
+            throw new DuplicatedResourceException("Project", "owner", "You are not authorized to update this project");
+        }
+
         Project updatedProject = projectService.update(id, project.getName(), project.getDescription());
         return ResponseEntity.ok(updatedProject);
     }
@@ -90,7 +104,13 @@ public class ProjectController {
         @ApiResponse(code = 404, message = "The task does not exist", response = ErrorDetailsResponse.class)
     })
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> doRemoveProjectById(@PathVariable("id") Long id) throws InstanceNotFoundException {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> doRemoveProjectById(@PathVariable("id") Long id, @RequestHeader (name="Authorization") String token) throws InstanceNotFoundException, DuplicatedResourceException {
+        boolean isOwner = projectService.isOwner(id, jwtTokenProvider.getUser(token).getName());
+        if (!isOwner) {
+            throw new DuplicatedResourceException("Project", "owner", "You are not authorized to remove this project");
+        }
+        
         projectService.removeById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
