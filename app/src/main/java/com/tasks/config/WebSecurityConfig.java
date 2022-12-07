@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import com.tasks.config.JwtAuthorizationFilter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
@@ -40,7 +42,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.GET,  "/swagger-ui.html").permitAll()
             .antMatchers(HttpMethod.GET,  "/swagger-resources/**").permitAll()
             .antMatchers(HttpMethod.GET,  "/v2/api-docs").permitAll()
-            .anyRequest().permitAll();
+            .anyRequest().permitAll()
+            .and()
+            // Authentication filter, this will intercept request path for login ("/login").
+            .addFilter(new JwtAuthorizationFilter(tokenProvider,  authenticationManager()))
+            // Authorization filter to check jwt validity.
+            .addFilter(new JwtAuthorizationFilter(tokenProvider,  authenticationManager()))
+            // This disables session creation on Spring Security
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
     @Bean
@@ -57,5 +66,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager customAuthenticationManager() throws Exception {
         return authenticationManager();
     }
+
 
 }
