@@ -42,14 +42,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.GET,  "/swagger-ui.html").permitAll()
             .antMatchers(HttpMethod.GET,  "/swagger-resources/**").permitAll()
             .antMatchers(HttpMethod.GET,  "/v2/api-docs").permitAll()
-            .anyRequest().permitAll()
-            .and()
-            // Authentication filter, this will intercept request path for login ("/login").
-            .addFilter(new JwtAuthorizationFilter(tokenProvider,  authenticationManager()))
-            // Authorization filter to check jwt validity.
-            .addFilter(new JwtAuthorizationFilter(tokenProvider,  authenticationManager()))
-            // This disables session creation on Spring Security
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            .anyRequest().permitAll();
+
+        // Authentication filter
+        http.addFilter(new JwtAuthorizationFilter(tokenProvider,  authenticationManager()));
+
+        // This disables session creation on Spring Security
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
     @Bean
