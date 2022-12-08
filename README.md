@@ -9,6 +9,8 @@ To Fix: :x:
 * **email:** admin1 - **password:** secret
 
 ## TODO
-* Implement login :x:
-* OAUTH :x:
-* ... :x:
+* Implement login: :heavy_check_mark:
+* OAuth2: :heavy_check_mark:
+* JWT Authentication: :heavy_check_mark:
+* Access Control: :heavy_check_mark:
+* Access Control by Roles: :heavy_check_mark:
