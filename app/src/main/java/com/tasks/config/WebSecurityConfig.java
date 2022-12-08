@@ -38,13 +38,36 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         
+        // Permit requests to static resources
+        http.authorizeRequests()
+            .antMatchers("/resources/**").permitAll()
+            .antMatchers("/static/**").permitAll()
+            .antMatchers("/css/**").permitAll()
+            .antMatchers("/js/**").permitAll()
+            .antMatchers("/images/**").permitAll()
+            .antMatchers("/webjars/**").permitAll()
+            .antMatchers("/favicon.ico").permitAll();
+        
+        // Permit requests to swagger
         http.authorizeRequests()
             .antMatchers(HttpMethod.GET,  "/swagger-ui.html").permitAll()
             .antMatchers(HttpMethod.GET,  "/swagger-resources/**").permitAll()
-            .antMatchers(HttpMethod.GET,  "/v2/api-docs").permitAll()
-            .anyRequest().permitAll();
+            .antMatchers(HttpMethod.GET,  "/v2/api-docs").permitAll();
 
-        // Authentication filter
+        // Permit front-end requests
+        http.authorizeRequests()
+            .antMatchers("/dashboard/**").permitAll()
+            .antMatchers("/application/**").permitAll()
+            .antMatchers("/react-libs/**").permitAll()
+            .antMatchers("/javascript-libs/**").permitAll();
+
+        // Permit API requests
+        http.authorizeRequests().antMatchers("/api/**").permitAll();
+
+        // Deny all other requests by default
+        http.authorizeRequests().anyRequest().denyAll();
+
+        // JWT Authentication filter
         http.addFilter(new JwtAuthorizationFilter(tokenProvider,  authenticationManager()));
 
         // This disables session creation on Spring Security
